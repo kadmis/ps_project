@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>close.png</file>
+        <file>minimize.png</file>
+    </qresource>
+</RCC>

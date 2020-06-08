@@ -1,6 +1,6 @@
 #include "deencryptor.h"
 
-Q_INVOKABLE Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool isDecrypt) const
+Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool isDecrypt)
 {
     src = src.remove(0,8);
     LPCWSTR sourceFileName = _wcsdup(src.toStdWString().c_str());
@@ -110,6 +110,13 @@ Q_INVOKABLE Result DeEncryptor::deencrypt(QString src, QString dst, QString pass
     {
         return Result(true,"Poprawnie zaszyfrowano plik");
     }
+}
+
+void DeEncryptor::startDeencryption(QString src, QString dst, QString password, bool isDecrypt)
+{
+    if(m_future.isRunning()) return;
+    m_future = QtConcurrent::run(deencrypt,src,dst,password,isDecrypt);
+    m_futureWatcher.setFuture(m_future);
 }
 
 

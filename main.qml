@@ -6,7 +6,6 @@ import QtQuick.Dialogs 1.2
 
 import helper 1.0
 import deencryptor 1.0
-import result 1.0
 
 
 ApplicationWindow {
@@ -288,7 +287,9 @@ ApplicationWindow {
                 Material.foreground: isDark ? "black" : "white"
 
                 onClicked: {
+                    let isDecrypt = switchMode.checked
                     busyIndicator.running = true
+
                     if(srcFileFullPath.text.toString().length==0 || dstFileName.text.toString().length==0) {
                         popupMessageText.text = "Nazwa pliku musi zawierać jeden lub więcej znaków"
                         popupTitle.text = "Błąd"
@@ -305,17 +306,7 @@ ApplicationWindow {
                             fullDstFilePath = dstFileName.text.toString()
                         }
 
-                        if(switchMode.checked) {
-                            res.copyValues(deencryptor.deencrypt(srcFileFullPath.text.toString(),fullDstFilePath,password.text.toString(), true))
-                        }
-                        else {
-                            res.copyValues(deencryptor.deencrypt(srcFileFullPath.text.toString(),fullDstFilePath,password.text.toString(), false))
-                        }
-
-                        popupTitle.text = res.isSuccess() ? "Sukces" : "Błąd"
-                        popupMessageText.text = res.getMessage()
-                        popupMessage.open()
-                        busyIndicator.running = false
+                        startDeencryption(srcFileFullPath.text.toString(),fullDstFilePath, password.text.toString(), isDecrypt)
                     }
                 }
             }
@@ -422,9 +413,19 @@ ApplicationWindow {
         }
     }
 
-    Result {
-        id: res
+    signal startDeencryption(string src, string dst, string pswd, bool isDecrypt)
+
+    Connections {
+        target: deencryptor
+        onDeencryptionFinished: {
+            busyIndicator.running = false
+            popupTitle.text = isSuccess ? "Sukces" : "Błąd"
+            popupMessageText.text = message
+            popupMessage.open()
+        }
     }
+
+
 }
 
 

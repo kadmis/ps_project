@@ -18,7 +18,7 @@ ApplicationWindow {
     color: "transparent"
 
     property bool isDark: false
-    property bool isDehasher: false
+    property bool isDecrypt: false
     property int previousX
     property int previousY
 
@@ -56,7 +56,7 @@ ApplicationWindow {
                 anchors.topMargin: 525
                 anchors.fill: parent
 
-                onCheckedChanged: isDehasher=!isDehasher
+                onCheckedChanged: isDecrypt=!isDecrypt
             }
 
             Text {
@@ -65,7 +65,7 @@ ApplicationWindow {
                 anchors.bottomMargin: 447
                 anchors.leftMargin: 341
                 anchors.topMargin: 93
-                text: isDehasher ? qsTr("Odszyfrowywanie") : qsTr("Szyfrowanie")
+                text: isDecrypt ? qsTr("Odszyfrowywanie") : qsTr("Szyfrowanie")
                 anchors.fill: parent
                 horizontalAlignment: Text.AlignHCenter
                 font.pixelSize: 25
@@ -152,7 +152,9 @@ ApplicationWindow {
                         icon.color: isDark ? "black" : "white"
                         Material.background: Material.Red
 
-                        onClicked: mainWindow.close()
+                        onClicked: {
+                            mainWindow.close()
+                        }
                     }
                 }
 
@@ -287,8 +289,8 @@ ApplicationWindow {
                 Material.foreground: isDark ? "black" : "white"
 
                 onClicked: {
-                    let isDecrypt = switchMode.checked
                     busyIndicator.running = true
+                    disableSomeUI()
 
                     if(srcFileFullPath.text.toString().length==0 || dstFileName.text.toString().length==0) {
                         popupMessageText.text = "Nazwa pliku musi zawierać jeden lub więcej znaków"
@@ -422,9 +424,31 @@ ApplicationWindow {
             popupTitle.text = isSuccess ? "Sukces" : "Błąd"
             popupMessageText.text = message
             popupMessage.open()
+            enableSomeUI()
         }
     }
 
+    function disableSomeUI() {
+        switchMode.enabled = false
+        srcFileName.enabled = false
+        dstFileName.enabled = false
+        selectSrcFile.enabled = false
+        selectDstFolder.enabled = false
+        password.enabled = false
+        executeBtn.enabled = false
+        closeButton.enabled = false
+    }
+
+    function enableSomeUI() {
+        switchMode.enabled = true
+        srcFileName.enabled = true
+        dstFileName.enabled = true
+        selectSrcFile.enabled = true
+        selectDstFolder.enabled = true
+        password.enabled = true
+        executeBtn.enabled = true
+        closeButton.enabled = true
+    }
 
 }
 

@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
+import QtGraphicalEffects 1.0
 
 import helper 1.0
 import deencryptor 1.0
@@ -32,7 +33,7 @@ ApplicationWindow {
             y: 10
             width: parent.width-20
             height: parent.height-20
-            radius: 20
+            radius: 25
             color: Material.backgroundColor
 
             //mouse area w celu tracenia focusu po odkliknieciu w pola tekstowe
@@ -43,7 +44,6 @@ ApplicationWindow {
                     focus = true
                 }
             }
-
 
             Switch {
                 id: switchMode
@@ -114,7 +114,7 @@ ApplicationWindow {
                     color: isDark ? "black" : "white"
                     z:100
                     Material.elevation: 6
-                    ToolTip.text: qsTr("Stworzone przez:\n-Kamil Adamus\n-Robert Sobala\nGrupa: IP30s3")
+                    ToolTip.text: qsTr("Stworzone przez: Kamil Adamus, Robert Sobala\nGrupa: IP30s3")
                     ToolTip.visible: titleMouseArea.containsMouse
 
                     MouseArea {
@@ -133,7 +133,6 @@ ApplicationWindow {
 
                     RoundButton {
                         id: minimizeButton
-                        //scale: 0.7
                         Layout.fillHeight: true
                         Layout.alignment: Qt.AlignRight
                         icon.source: "minimize.png"
@@ -195,7 +194,7 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.leftMargin: 206
                 placeholderText: qsTr("Nazwa pliku źródłowego")
-                selectByMouse: true
+                readOnly: true
             }
 
             TextField {
@@ -289,16 +288,21 @@ ApplicationWindow {
                 Material.foreground: isDark ? "black" : "white"
 
                 onClicked: {
-                    busyIndicator.running = true
-                    disableSomeUI()
-
-                    if(srcFileFullPath.text.toString().length==0 || dstFileName.text.toString().length==0) {
-                        popupMessageText.text = "Nazwa pliku musi zawierać jeden lub więcej znaków"
+                    if(srcFileName.text.toString().length==0) {
+                        popupMessageText.text = "Nazwa pliku źródłowego musi zawierać jeden lub więcej znaków"
                         popupTitle.text = "Błąd"
                         popupMessage.open()
-                        busyIndicator.running = false
                     }
-                    else {                        
+                    else if(dstFileName.text.toString().length==0) {
+                        popupMessageText.text = "Nazwa pliku docelowego musi zawierać jeden lub więcej znaków"
+                        popupTitle.text = "Błąd"
+                        popupMessage.open()
+                    }
+                    else {
+
+                        busyIndicator.running = true
+                        disableSomeUI()
+
                         let fullDstFilePath
 
                         if(dstFolderPath.text.toString().length>0) {
@@ -339,8 +343,8 @@ ApplicationWindow {
 
     BusyIndicator {
         id: busyIndicator
-        width:100
-        height:100
+        width: 100
+        height: 100
         x: parent.x + (parent.width - this.width)/2
         y: parent.y + (parent.height - this.height)/2
         running: false
@@ -357,9 +361,8 @@ ApplicationWindow {
         closePolicy: Popup.NoAutoClose
 
         Overlay.modal: Rectangle {
-            radius:20
-            color:"#aacfdbe7"
-            width: 5
+            color: "#aa505050"
+            radius: 15
         }
 
         background: Rectangle {
@@ -397,7 +400,7 @@ ApplicationWindow {
 
                 Text {
                    id: popupMessageText
-                   font.pointSize: 12
+                   font.pointSize: 10
                    color: isDark ? "white" : "black"
                    padding: 8
                    Layout.alignment: Qt.AlignHCenter
@@ -430,8 +433,8 @@ ApplicationWindow {
 
     function disableSomeUI() {
         switchMode.enabled = false
-        srcFileName.enabled = false
         dstFileName.enabled = false
+        srcFileName.enabled = false
         selectSrcFile.enabled = false
         selectDstFolder.enabled = false
         password.enabled = false
@@ -441,15 +444,14 @@ ApplicationWindow {
 
     function enableSomeUI() {
         switchMode.enabled = true
-        srcFileName.enabled = true
         dstFileName.enabled = true
+        srcFileName.enabled = true
         selectSrcFile.enabled = true
         selectDstFolder.enabled = true
         password.enabled = true
         executeBtn.enabled = true
         closeButton.enabled = true
     }
-
 }
 
 

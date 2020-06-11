@@ -24,6 +24,7 @@ class DeEncryptor : public QObject
     QFutureWatcher<Result> m_futureWatcher;
 
     static Result deencrypt(QString src, QString dst, QString password, bool isDecrypt);
+    static void DeleteDestinationFile(HANDLE, LPCWSTR dstName);
     Q_SLOT void deencryptionTaskFinished()
     {
         Result result(m_future);

@@ -27,6 +27,7 @@ Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool i
 
     if (!CryptAcquireContextW(&hProv, nullptr, info, PROV_RSA_AES, CRYPT_VERIFYCONTEXT))
     {
+        DeleteDestinationFile(hOutFile,destinationFileName);
         CryptReleaseContext(hProv, 0);
         return Result(false,"Operacja nie powiodła się");
     }
@@ -34,18 +35,21 @@ Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool i
     HCRYPTHASH hHash;
     if (!CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash))
     {
+        DeleteDestinationFile(hOutFile,destinationFileName);
         CryptReleaseContext(hProv, 0);
         return Result(false,"Operacja nie powiodła się");
     }
 
     if (!CryptHashData(hHash, (BYTE*)pass, len, 0))
     {
+        DeleteDestinationFile(hOutFile,destinationFileName);
         return Result(false,"Operacja nie powiodła się");
     }
 
     HCRYPTKEY hKey;
     if (!CryptDeriveKey(hProv, CALG_AES_256, hHash, 0, &hKey))
     {
+        DeleteDestinationFile(hOutFile,destinationFileName);
         CryptReleaseContext(hProv, 0);
         return Result(false,"Operacja nie powiodła się");
     }
@@ -75,6 +79,7 @@ Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool i
         {
             if (!CryptDecrypt(hKey, NULL, isFinal, 0, chunk, &out_len))
             {
+                DeleteDestinationFile(hOutFile,destinationFileName);
                 return Result(false,"Operacja nie powiodła się");
             }
         }
@@ -83,6 +88,7 @@ Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool i
 
             if (!CryptEncrypt(hKey, NULL, isFinal, 0, chunk, &out_len, chunk_size))
             {
+                DeleteDestinationFile(hOutFile,destinationFileName);
                 return Result(false,"Operacja nie powiodła się");
             }
         }
@@ -90,6 +96,7 @@ Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool i
         DWORD written = 0;
         if (!WriteFile(hOutFile, chunk, out_len, &written, NULL))
         {
+            DeleteDestinationFile(hOutFile,destinationFileName);
             return Result(false,"Operacja nie powiodła się");
         }
         memset(chunk, 0, chunk_size);
@@ -110,6 +117,12 @@ Result DeEncryptor::deencrypt(QString src, QString dst, QString password, bool i
     {
         return Result(true,"Poprawnie zaszyfrowano plik");
     }
+}
+
+void DeEncryptor::DeleteDestinationFile(HANDLE fileHandle, LPCWSTR dstName)
+{
+    CloseHandle(fileHandle);
+    DeleteFileW(dstName);
 }
 
 void DeEncryptor::startDeencryption(QString src, QString dst, QString password, bool isDecrypt)
